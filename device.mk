@@ -5,13 +5,47 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-LOCAL_PATH := device/infinix/Infinix-X6532
-# A/B
+LOCAL_PATH := device/infinix/X6532
+
+# Enable Virtual A/B OTA
+$(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/launch_with_vendor_ramdisk.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/compression.mk)
+
+ENABLE_VIRTUAL_AB := true
+AB_OTA_UPDATER := true
+
+AB_OTA_PARTITIONS += \
+    boot \
+    dtbo \
+    lk \
+    odm \
+    odm_dlkm \
+    product \
+    system \
+    system_ext \
+    vbmeta_system \
+    vbmeta_vendor \
+    vendor \
+    vendor_boot \
+    vendor_dlkm
+
 AB_OTA_POSTINSTALL_CONFIG += \
     RUN_POSTINSTALL_system=true \
-    POSTINSTALL_PATH_system=system/bin/otapreopt_script \
+    POSTINSTALL_PATH_system=system/bin/mtk_plpath_utils \
     FILESYSTEM_TYPE_system=ext4 \
     POSTINSTALL_OPTIONAL_system=true
+
+AB_OTA_POSTINSTALL_CONFIG += \
+    RUN_POSTINSTALL_vendor=true \
+    POSTINSTALL_PATH_vendor=bin/checkpoint_gc \
+    FILESYSTEM_TYPE_vendor=ext4 \
+    POSTINSTALL_OPTIONAL_vendor=true
+
+PRODUCT_PACKAGES += \
+    otapreopt_script \
+    cppreopts.sh
+
+PRODUCT_PROPERTY_OVERRIDES += ro.twrp.vendor_boot=true
 
 # Boot control HAL
 PRODUCT_PACKAGES += \
@@ -21,15 +55,33 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     bootctrl.mt6768
 
-PRODUCT_STATIC_BOOT_CONTROL_HAL := \
-    bootctrl.mt6768 \
-    libgptutils \
-    libz \
-    libcutils
-
+# Fastbootd
 PRODUCT_PACKAGES += \
-    otapreopt_script \
-    cppreopts.sh \
+    android.hardware.fastboot@1.0-impl-mock \
+    fastbootd
+
+# Health Hal
+PRODUCT_PACKAGES += \
+    android.hardware.health@2.1-impl \
+    android.hardware.health@2.1-service
+	
+# Dynamic Partitions
+PRODUCT_USE_DYNAMIC_PARTITIONS := true
+
+# API
+PRODUCT_SHIPPING_API_LEVEL := 31
+PRODUCT_TARGET_VNDK_VERSION := 31
+
+# Update engine
+PRODUCT_PACKAGES += \
     update_engine \
-    update_verifier \
-    update_engine_sideload
+    update_engine_sideload \
+    update_verifier
+
+PRODUCT_PACKAGES_DEBUG += \
+    update_engine_client
+
+# MTK plpath utils
+PRODUCT_PACKAGES += \
+    mtk_plpath_utils \
+    mtk_plpath_utils.recovery
