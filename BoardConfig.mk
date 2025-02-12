@@ -101,7 +101,7 @@ TARGET_USERIMAGES_USE_F2FS := true
 BOARD_VNDK_VERSION := current
 
 # Properties
-TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
+#TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
 
 # Verified Boot
 BOARD_AVB_ENABLE := true
